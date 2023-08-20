@@ -27,15 +27,15 @@ void APUMainCharacter::MoveForward(float Value)
 	Super::MoveForward(Value);
 	if(!FMath::IsNearlyZero(Value))
 	{
-		float Current = GetMesh()->GetRelativeRotation().Yaw;
+		float Current = GetActorRotation().Yaw;
 		float Target = FRotator::ZeroRotator.Yaw;
 		Target += (Value < 0.f) ? ((Current > -180.f && Current < 0.f) ? -180.f : 180.f) : 0.f;
 		if(!FMath::IsNearlyZero(FMath::Abs(Target-Current)) && !FMath::IsNearlyEqual(FMath::Abs(Target-Current), 360.f))
 		{
 			Current = FMath::FInterpTo(Current, Target, FApp::GetDeltaTime(), RotationSpeed);
-			GetMesh()->SetRelativeRotation(FRotator(0.f, Current, 0.f));
+			SetActorRotation(FRotator(0.f, Current, 0.f));
 		}
-		AddMovementInput(GetActorForwardVector(), Value);
+		AddMovementInput(FRotator::ZeroRotator.Vector(), Value);
 	}
 }
 
@@ -44,7 +44,7 @@ void APUMainCharacter::MoveRight(float Value)
 	Super::MoveRight(Value);
 	if(!FMath::IsNearlyZero(Value))
 	{
-		float Current = GetMesh()->GetRelativeRotation().Yaw;
+		float Current = GetActorRotation().Yaw;
 		float Target = FRotator::ZeroRotator.Yaw + 90.f;
 		Target -= (Value < 0.f) ? 180.f : 0.f;
 		if(!FMath::IsNearlyZero(FMath::Abs(Target-Current)) && !FMath::IsNearlyEqual(FMath::Abs(Target-Current), 360.f))
@@ -59,9 +59,9 @@ void APUMainCharacter::MoveRight(float Value)
 			}
 			
 			Current = FMath::FInterpTo(Current, Target, FApp::GetDeltaTime(), RotationSpeed);
-			GetMesh()->SetRelativeRotation(FRotator(0.f, Current, 0.f));
+			SetActorRotation(FRotator(0.f, Current, 0.f));
 	 	}
-		AddMovementInput(GetActorRightVector(), Value);
+		AddMovementInput(CameraComponent->GetRightVector(), Value);
 	}
 }
 

@@ -28,7 +28,7 @@ protected:
 	UCameraComponent* CameraComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement");
-	float RotationSpeed = 5.f;
+	float RotationSpeed = 1.f;
 
 public:
 	virtual void Tick(float DeltaSeconds) override;
