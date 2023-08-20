@@ -19,6 +19,7 @@ public:
 
 	virtual void MoveForward(float Value) override;
 	virtual void MoveRight(float Value) override;
+	virtual void Dash() override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
@@ -27,8 +28,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement");
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Basic Movement");
 	float RotationSpeed = 1.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Basic Movement")
+	float DashLength = 500.f;
 
 public:
 	virtual void Tick(float DeltaSeconds) override;

@@ -70,3 +70,15 @@ void APUMainCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	FApp::SetDeltaTime(DeltaSeconds);
 }
+
+void APUMainCharacter::Dash()
+{
+	float ForwardAxisValue = GetController()->GetInputAxisValue("MoveForward");
+	float RightAxisValue = GetController()->GetInputAxisValue("MoveRight");
+
+	FVector CurrentActorLocation = GetActorLocation();
+	FVector TargetOrientationVector = FRotator::ZeroRotator.Vector() * ForwardAxisValue + CameraComponent->GetRightVector() * RightAxisValue;
+	FVector TargetActorLocation = CurrentActorLocation + TargetOrientationVector * DashLength;
+
+	
+}
