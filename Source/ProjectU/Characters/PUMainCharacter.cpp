@@ -76,9 +76,14 @@ void APUMainCharacter::Dash()
 	float ForwardAxisValue = GetController()->GetInputAxisValue("MoveForward");
 	float RightAxisValue = GetController()->GetInputAxisValue("MoveRight");
 
-	FVector CurrentActorLocation = GetActorLocation();
-	FVector TargetOrientationVector = FRotator::ZeroRotator.Vector() * ForwardAxisValue + CameraComponent->GetRightVector() * RightAxisValue;
-	FVector TargetActorLocation = CurrentActorLocation + TargetOrientationVector * DashLength;
+	if(bCanDash)
+	{
+		FVector CurrentActorLocation = GetActorLocation();
+		FVector TargetOrientationVector = FRotator::ZeroRotator.Vector() * ForwardAxisValue + CameraComponent->GetRightVector() * RightAxisValue;
+		FVector TargetActorLocation = CurrentActorLocation + TargetOrientationVector * DashLength;
 
-	
+		SetActorLocation(TargetActorLocation);
+		bCanDash = false;
+		GetWorld()->GetTimerManager().SetTimer(DashCooldownTimer, [this]{bCanDash = true;}, DashCooldown, false);
+	}
 }

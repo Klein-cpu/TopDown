@@ -32,11 +32,18 @@ protected:
 	float RotationSpeed = 1.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Basic Movement")
-	float DashLength = 500.f;
+	float DashLength = 200.f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Basic Movement")
+	float DashCooldown = 10.f;
+    	
 public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY()
 	USkeletalMeshComponent* BaseMesh;
+
+	bool bCanDash = true;
+
+	FTimerHandle DashCooldownTimer;
 };
