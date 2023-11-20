@@ -20,6 +20,7 @@ APUMainCharacter::APUMainCharacter()
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
 	BaseMesh = Cast<USkeletalMeshComponent>(GetMesh());
+	
 }
 
 void APUMainCharacter::MoveForward(float Value)
@@ -27,14 +28,6 @@ void APUMainCharacter::MoveForward(float Value)
 	Super::MoveForward(Value);
 	if(!FMath::IsNearlyZero(Value))
 	{
-		float Current = GetActorRotation().Yaw;
-		float Target = FRotator::ZeroRotator.Yaw;
-		Target += (Value < 0.f) ? ((Current > -180.f && Current < 0.f) ? -180.f : 180.f) : 0.f;
-		if(!FMath::IsNearlyZero(FMath::Abs(Target-Current)) && !FMath::IsNearlyEqual(FMath::Abs(Target-Current), 360.f))
-		{
-			Current = FMath::FInterpTo(Current, Target, FApp::GetDeltaTime(), RotationSpeed);
-			SetActorRotation(FRotator(0.f, Current, 0.f));
-		}
 		AddMovementInput(FRotator::ZeroRotator.Vector(), Value);
 	}
 }
@@ -44,23 +37,6 @@ void APUMainCharacter::MoveRight(float Value)
 	Super::MoveRight(Value);
 	if(!FMath::IsNearlyZero(Value))
 	{
-		float Current = GetActorRotation().Yaw;
-		float Target = FRotator::ZeroRotator.Yaw + 90.f;
-		Target -= (Value < 0.f) ? 180.f : 0.f;
-		if(!FMath::IsNearlyZero(FMath::Abs(Target-Current)) && !FMath::IsNearlyEqual(FMath::Abs(Target-Current), 360.f))
-		{
-			if(FMath::Abs(Target - (360.f + Current)) < FMath::Abs(Target - Current))
-			{
-				Current += 360.f;
-			}
-			if(Target + FMath::Abs(360.f - Current) < FMath::Abs(Target - Current))
-			{
-				Current -= 360.f;
-			}
-			
-			Current = FMath::FInterpTo(Current, Target, FApp::GetDeltaTime(), RotationSpeed);
-			SetActorRotation(FRotator(0.f, Current, 0.f));
-	 	}
 		AddMovementInput(CameraComponent->GetRightVector(), Value);
 	}
 }
@@ -69,6 +45,7 @@ void APUMainCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	FApp::SetDeltaTime(DeltaSeconds);
+	CharacterRotation();
 }
 
 void APUMainCharacter::Dash()
@@ -86,4 +63,58 @@ void APUMainCharacter::Dash()
 		bCanDash = false;
 		GetWorld()->GetTimerManager().SetTimer(DashCooldownTimer, [this]{bCanDash = true;}, DashCooldown, false);
 	}
+}
+
+void APUMainCharacter::CharacterRotation()
+{
+	float MoveForwardAxisValue = GetController()->GetInputAxisValue("MoveForward");
+	float MoveRightAxisValue = GetController()->GetInputAxisValue("MoveRight");
+
+	if(FMath::IsNearlyZero(MoveForwardAxisValue) && FMath::IsNearlyZero(MoveRightAxisValue))
+	{
+		return;
+	}
+
+	float CurrentRotation = GetActorRotation().Yaw;
+	float TargetForwardRotation = FRotator::ZeroRotator.Yaw;
+	float TargetRightRotation = FRotator::ZeroRotator.Yaw;
+	float TargetRotation = FRotator::ZeroRotator.Yaw;
+	
+	if(!FMath::IsNearlyZero(MoveForwardAxisValue))
+	{
+		//Changing forward component of rotation
+		TargetForwardRotation += (MoveForwardAxisValue < 0.f) ? (CurrentRotation < 0.f && CurrentRotation > -180.f ? -180.f : 180.f) : 0.f;
+	}
+	
+	if(!FMath::IsNearlyZero(MoveRightAxisValue)) //Changing right component of rotation
+	{
+		TargetRightRotation += 90.f;
+		TargetRightRotation -= (MoveRightAxisValue < 0.f) ? 180.f : 0.f;
+		if(FMath::Sign(TargetForwardRotation) != FMath::Sign(TargetRightRotation)) TargetForwardRotation *= -1;
+	}
+	
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("Current: %.4f"), CurrentRotation));
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("Forward: %.2f"), TargetForwardRotation));
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("Right: %.2f"), TargetRightRotation));
+	TargetRotation = TargetForwardRotation + TargetRightRotation;
+	
+	if(!FMath::IsNearlyZero(MoveForwardAxisValue) && !FMath::IsNearlyZero(MoveRightAxisValue))
+	{
+		TargetRotation /= 2;
+	}
+
+	if(FMath::Abs(TargetRotation - CurrentRotation) > 180.f)
+	{
+		if(TargetRotation > CurrentRotation)
+		{
+			CurrentRotation += 360.f; 
+		}
+		else
+		{
+			CurrentRotation -= 360.f;
+		}
+	}
+	
+	CurrentRotation = FMath::FInterpTo(CurrentRotation, TargetRotation, FApp::GetDeltaTime(), RotationSpeed);
+	SetActorRotation(FRotator(0.f, CurrentRotation, 0.f));
 }

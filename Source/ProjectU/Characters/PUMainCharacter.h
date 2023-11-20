@@ -36,10 +36,13 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Basic Movement")
 	float DashCooldown = 10.f;
-    	
+
+	void CharacterRotation();
+	
 public:
 	virtual void Tick(float DeltaSeconds) override;
 
+private:
 	UPROPERTY()
 	USkeletalMeshComponent* BaseMesh;
 
